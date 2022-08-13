@@ -1,24 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import ActivateLayout from './Layouts/ActivateLayout/ActivateLayout';
+import AuthLayout from './Layouts/AuthLayout/AuthLayout'
+import ProfileLayout from './Layouts/ProfileLayout/ProfileLayout'
+import ResetLayout from './Layouts/ResetLayout/ResetLayout';
 
 function App() {
+  const isLoggedIn = true;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  <Router>
+    <Switch>
+      <Route 
+      path="/" 
+      exact 
+      component={isLoggedIn ? ProfileLayout : AuthLayout} 
+      />
+      <Route
+        path="/auth/reset-password/:token"
+        exact
+        component={ResetLayout}
+      />
+      <Route
+      path="/api/auth/activate/:activate_token"
+      exact
+      component={ActivateLayout}
+      />
+    </Switch>
+  </Router>
   );
 }
 
