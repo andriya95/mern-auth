@@ -3,6 +3,8 @@ const path = require('path');
 const morgan = require('morgan');
 const express = require('express');
 
+const api = require('./routes/api');
+
 const app = express();
 
 app.use(cors({
@@ -13,8 +15,11 @@ app.use(morgan('common'));
 
 app.use(express.json());
 
+express.urlencoded({ extended: true });
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+app.use(api);
 
 app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
