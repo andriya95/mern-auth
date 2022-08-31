@@ -2,8 +2,26 @@ import './sidebar.css';
 import {BiBookContent} from 'react-icons/bi';
 import {BiUserCircle} from 'react-icons/bi';
 import {BiLogOut} from 'react-icons/bi'
+import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext'
+import { useContext } from 'react';
 
 const Sidebar = () => {
+
+  const { dispatch } = useContext(AuthContext)
+
+  const handleClick = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.get('/v1/api/auth/signout');
+      localStorage.removeItem('_appSignin')
+      dispatch({ type: "SIGNOUT"})
+
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   return (
     <div className="sidebar">
       <div className="sidebar_menu">
@@ -16,7 +34,7 @@ const Sidebar = () => {
             <BiUserCircle />
             <p>profile</p>
           </li>
-          <li>
+          <li onClick={handleClick}>
             <BiLogOut />
             <p>logout</p>
           </li>

@@ -52,6 +52,19 @@
   }
 }
 
+.toast-failed {
+  background: $pink !important;
+  color: #fff;
+}
+.toast-success {
+  background: $green !important;
+  color: #fff;
+}
+
+input[type="text"]:disabled {
+  color: #000;
+}
+
 @include for-desktop {
   .input {
     label {

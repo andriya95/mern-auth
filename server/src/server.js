@@ -1,8 +1,8 @@
 const http = require('http');
-const cookieParser = require('cookie-parser');
 
 
 require('dotenv').config();
+
 
 const app = require('./app');
 const { mongoConnect } = require('./services/mongo');

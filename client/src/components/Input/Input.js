@@ -20,7 +20,7 @@ const Input = ({
           defaultValue={defaultValue} 
           disabled={disabled} 
           placeholder="&nbsp;"
-          autocomplete="off" 
+          autoComplete="off" 
         />
         <span>{text}</span>
       </label>

@@ -22,9 +22,12 @@ express.urlencoded({ extended: true });
 app.use(cookieParser());
 
 
+app.use('uploads', express.static('uploads'));
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(api);
+
 
 app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));

@@ -7,7 +7,7 @@ async function auth(req, res, next) {
     
     if(!token) {
       return res.status(400).json({
-        message: 'Authentication failed'
+        message: 'Authentication failed!'
       });
     }
 

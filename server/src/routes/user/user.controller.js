@@ -1,17 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { google } = require('googleapis');
+const { OAuth2 } = google.auth;
 
-const User = require('../models/user.model');
-const validateEmail = require('../services/validateEmail');
-const createToken = require('../services/createToken');
+const User = require('../../models/user.model');
+const validateEmail = require('../../services/validateEmail');
+const createToken = require('../../services/createToken');
 
 const {
   sendEmailRegister,
   sendEmailReset,
-} = require('../services/sendMail');
+} = require('../../services/sendMail');
 
 
-const { REFRESH_TOKEN, ACTIVATION_TOKEN } = process.env;
+const { REFRESH_TOKEN, ACTIVATION_TOKEN, G_CLIENT_ID } = process.env;
 
 
 async function registerUser(req, res) {
@@ -32,7 +34,7 @@ async function registerUser(req, res) {
       })
     }
     //check if user exists already
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
 
     if (user) {
       return res.status(400).json({
@@ -82,7 +84,7 @@ async function activateUser(req, res) {
     const { name, email, password } = user;
 
     //double check the user
-    const check = await User.findOne({email});
+    const check = await User.findOne({ email });
 
     if (check) {
       return res.status(400).json({
@@ -136,10 +138,10 @@ async function userSignIn(req, res) {
 
     res.cookie('_apprftoken', rf_token, {
       httpOnly: true,
-      path: "/v1/api/auth/access",
+      path: '/v1/api/auth/access',
       maxAge: 24 * 60 * 60 * 1000,
     });
-
+    
     //singing in success
     return res.status(200).json({
       message: "Successful sign in!"
@@ -237,6 +239,139 @@ async function resetPassword(req, res) {
   }
 }
 
+async function userInfo(req, res) {
+  try {
+    // get info -password
+    const user = await User
+      .findById(req.user.id)
+      .select("-password");
+
+    // return user
+     res.status(200).json(user);
+
+  } catch (err) {
+    res.status(500).json({ 
+      error: err.message 
+    });
+  }
+}
+
+async function update(req, res) {
+  try {
+    //get info
+    const { name, avatar } = req.body;
+
+    //update
+    await User.findOneAndUpdate(
+      { _id: req.user.id },
+      { name, avatar }
+    );
+
+    //success
+    res.status(200).json({
+      message: "Update successful!"
+    });
+
+  } catch(err) {
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+}
+
+async function signOut(req, res) {
+  try {
+    //clear cookie
+    res.clearCookie('_apprftoken', {path: '/v1/api/auth/access'})
+
+    //success
+    return res.status(200).json({
+      message: 'You successfully signed out!'
+    })
+
+  } catch(err) {
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+}
+
+async function googleSingIn(req, res) {
+  try {
+    //get google token id
+    const { tokenId } = req.body;
+
+    //verify token id
+    const client = new OAuth2(G_CLIENT_ID)
+    const verify = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: G_CLIENT_ID
+    })
+
+    //get data from token
+    const { email_verified, email, name, picture } = verify.payload;
+
+    //failed verification
+    if(!email_verified) {
+      return res.status(400).json({
+        message: 'Email verification failed!'
+      });
+    }
+
+    //passed verification
+    const user = await User.findOne({ email });
+
+    //1. if user exists sing them in
+    if(user) {
+      //refresh token
+      const rf_token = createToken.refresh({ id: user._id });
+
+      //store token in cookie
+      res.cookie('_apprftoken', rf_token, {
+        httpOnly: true,
+        path: '/v1/api/auth/access',
+        maxAge: 24 * 60 * 60 * 1000
+      });
+
+      res.status(200).json({
+        message: 'Google sing in successfull!'
+      });
+    } else {
+      //2. if user doesn't exist - create new user
+      const password = email + G_CLIENT_ID;
+      const salt = await bcrypt.genSalt();
+      const hashPassword = await bcrypt.hash(password, salt);
+      const newUser = new User({
+        name,
+        email,
+        password: hashPassword, 
+        avatar: picture
+      });
+      await newUser.save();
+
+      //sign in newUser
+      const rf_token = createToken.refresh({ id: user._id });
+
+      //store token in cookie
+      res.cookie('_apprftoken', rf_token, {
+        httpOnly: true,
+        path: '/v1/api/auth/access',
+        maxAge: 24 * 60 * 60 * 1000
+      });
+
+      // success
+      return res.status(200).json({
+        message: 'Google sing in successfull!'
+      })
+    }
+
+  } catch(err) {
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+}
+
 module.exports = {
   registerUser,
   activateUser,
@@ -244,4 +379,8 @@ module.exports = {
   access,
   forgot,
   resetPassword,
+  userInfo,
+  update,
+  signOut,
+  googleSingIn,
 }
