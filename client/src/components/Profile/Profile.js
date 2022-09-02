@@ -39,6 +39,9 @@ const Profile = () => {
     setData({...data, [e.target.name]: e.target.value});
   };
 
+  
+
+
   const updateInfo = async () => {
     try {
       const res = await axios.patch('/v1/api/auth/user_update', {
@@ -100,6 +103,13 @@ const Profile = () => {
     }
   };
 
+  const handleReset = () => {
+      Array.from(document.querySelectorAll("input")).forEach(
+        (input) => (input.value = "")
+      );
+      setData({...data, name: '', password: '', cf_password: ''});
+    };
+    
   const handleSubmit = (e) => {
     e.preventDefault();
     if (name || avatar) {
@@ -107,6 +117,7 @@ const Profile = () => {
     }
     if (password) {
       updatePassword();
+      handleReset();
     }
   };
 

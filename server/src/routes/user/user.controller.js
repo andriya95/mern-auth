@@ -15,6 +15,7 @@ const {
 
 const { REFRESH_TOKEN, ACTIVATION_TOKEN, G_CLIENT_ID } = process.env;
 
+//when registration service (sendEmailRegister) sends an email change url for docker production build
 
 async function registerUser(req, res) {
   try {
@@ -296,7 +297,7 @@ async function signOut(req, res) {
   }
 }
 
-async function googleSingIn(req, res) {
+async function googleSignIn(req, res) {
   try {
     //get google token id
     const { tokenId } = req.body;
@@ -306,7 +307,7 @@ async function googleSingIn(req, res) {
     const verify = await client.verifyIdToken({
       idToken: tokenId,
       audience: G_CLIENT_ID
-    })
+    });
 
     //get data from token
     const { email_verified, email, name, picture } = verify.payload;
@@ -382,5 +383,5 @@ module.exports = {
   userInfo,
   update,
   signOut,
-  googleSingIn,
+  googleSignIn,
 }

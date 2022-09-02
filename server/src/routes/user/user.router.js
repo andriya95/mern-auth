@@ -10,7 +10,7 @@ const {
   userInfo,
   update,
   signOut,
-  googleSingIn,
+  googleSignIn,
 } = require('./user.controller');
 
 const userRouter = express.Router();
@@ -24,6 +24,6 @@ userRouter.post('/api/auth/reset_pass', auth, resetPassword);
 userRouter.get('/api/auth/user', auth, userInfo);
 userRouter.patch('/api/auth/user_update', auth, update);
 userRouter.get('/api/auth/signout', signOut);
-userRouter.post('/api/auth/google_singin', googleSingIn);
+userRouter.post('/api/auth/google_signin', googleSignIn);
 
 module.exports = userRouter;

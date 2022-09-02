@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import {FcGoogle} from 'react-icons/fc';
+//import {FcGoogle} from 'react-icons/fc';
 import {MdVisibility} from 'react-icons/md';
 import {MdVisibilityOff} from 'react-icons/md'
 import Input from "../Input/Input";
@@ -9,6 +9,7 @@ import {ToastContainer, toast} from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import { isEmpty, isEmail } from "../helper/validate";
 import { AuthContext } from '../../context/AuthContext';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 
 const initialState = {
@@ -29,9 +30,9 @@ const Login = () => {
 
   const handleChange = (e) => {
     setData({...data, [e.target.name]: e.target.value});
-  }
+  };
 
-  const login = async (e) => {
+  const login = async(e) => {
     e.preventDefault()
     //check fields
     if (isEmpty(email) || isEmpty(password)) {
@@ -62,6 +63,30 @@ const Login = () => {
     }
   }
 
+  const googleSuccess = async(res) => {
+    const token = res.credential;
+    
+    try {
+      await axios.post('/v1/api/auth/google_signin', { tokenId: token });
+      localStorage.setItem('_appSignin', true);
+      dispatch({ type: "SIGNIN" });
+
+    } catch(err) {
+      toast(err.response.data.error, {
+        className: 'toast-failed',
+        bodyCLassName: 'toast-failed'
+      });
+    }
+  }
+
+  const googleError = (err) => {
+    toast(err.response.data.error, {
+      className: 'toast-failed',
+      bodyClassName: 'toast-failed'
+    });
+  };
+  
+
   return (
     <>
       <ToastContainer />
@@ -77,7 +102,13 @@ const Login = () => {
           />
         <div className="login_btn">
           <button type="submit">login</button>
-          <button className="btn-alt">sign in with <FcGoogle /></button>
+          <GoogleOAuthProvider >
+            <GoogleLogin
+              client_id={process.env.REACT_APP_G_CLIENT_ID}
+              onSuccess={googleSuccess}
+              onFailure={googleError}
+            />
+          </GoogleOAuthProvider>
         </div>
       </form>
     </>
