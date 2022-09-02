@@ -77,10 +77,10 @@ const Login = () => {
         bodyCLassName: 'toast-failed'
       });
     }
-  }
+  };
 
-  const googleError = (err) => {
-    toast(err.response.data.error, {
+  const googleError = () => {
+    toast("There was an error signing in, please try again later.", {
       className: 'toast-failed',
       bodyClassName: 'toast-failed'
     });
