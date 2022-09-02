@@ -40,6 +40,9 @@ build/Release
 # File Upload directory
 uploads/
 
+# deploy build directory
+public/
+
 # Dependency directories
 node_modules/
 jspm_packages/
